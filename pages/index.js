@@ -5,7 +5,6 @@ import { getErrorMsg } from "../helpers/index"
 // import { useRouter } from "next/router";
 import axios from 'axios'
 
-
 const Signup = () => {
   const [data, setData] = useState({
     firstName: "",
@@ -25,89 +24,79 @@ const Signup = () => {
   // const router = useRouter()
 
   const validateData = () => {
-      const err = []
-
-      if (!data.firstName || data.firstName.length < 4) {
-        err.push({ firstName: "First name must be at least 4 characters long" });
-      }
-      
-      if (!data.lastName || data.lastName.length < 4) {
-        err.push({ lastName: "Last name must be at least 4 characters long" });
-      }
-      
-      if (!data.fullAddress) {
-        err.push({ fullAddress: "Full address is required" });
-      }
-      
-      if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
-        err.push({ email: "Valid email is required" });
-      }
-      
-      if (!data.phoneNumber || !/^\d{10}$/.test(data.phoneNumber)) {
-        err.push({ phoneNumber: "Valid phone number is required" });
-      }
-      
-      if (!data.ssn || !/^\d{9}$/.test(data.ssn)) {
-        err.push({ ssn: "Valid SSN is required" });
-      }
-      
-      if (!data.driverLicense) {
-        err.push({ driverLicense: "Driver's License is required" });
-      }
-      
-      if (!data.position) {
-        err.push({ position: "Position is required" });
-      }
-      
-
-      setValidationErrors(err)
-
-      if (err.length > 0) {
-          return false
-      }
-      else {
-          return true
-      }
+    const err = []
+    if (!data.firstName || data.firstName.length < 4) {
+      err.push({ firstName: "First name must be at least 4 characters long" });
+    }
+    if (!data.lastName || data.lastName.length < 4) {
+      err.push({ lastName: "Last name must be at least 4 characters long" });
+    }
+    if (!data.fullAddress) {
+      err.push({ fullAddress: "Full address is required" });
+    }
+    if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
+      err.push({ email: "Valid email is required" });
+    }
+    if (!data.phoneNumber || !/^\d{10}$/.test(data.phoneNumber)) {
+      err.push({ phoneNumber: "Valid phone number is required" });
+    }
+    if (!data.ssn || !/^\d{9}$/.test(data.ssn)) {
+      err.push({ ssn: "Valid SSN is required" });
+    }
+    if (!data.driverLicense) {
+      err.push({ driverLicense: "Driver's License is required" });
+    }
+    if (!data.position) {
+      err.push({ position: "Position is required" });
+    }
+    console.log(err);
+    setValidationErrors(err)
+    if (err.length > 0) {
+      return false
+    }
+    else {
+      return true
+    }
   }
 
- 
-
   const handleSignup = async (event) => {
+    try {
       event.preventDefault()
-
       const isValid = validateData()
-
+      console.log(isValid, validationErrors);
       if (isValid) {
-          
+        console.log('enter');
+        try {
+          setLoading(true)
+          console.log({ data });
+          const apiRes = await axios.post("http://localhost:3000/api/auth/signup", data)
+          console.log(apiRes);
+          if (apiRes.data.success) {
+            // save data in session using next auth
+            setMessage("Information stored successfully")
+            //     const loginRes = await loginUser({
+            //       email: data.email,
+            //       password: data.password
+            //   });
 
-          try {
-              setLoading(true)
-              const apiRes = await axios.post("http://localhost:3000/api/auth/signup", data)
-
-              if (apiRes.data.success) {
-                  // save data in session using next auth
-                  setMessage("Information stored successfully")
-              //     const loginRes = await loginUser({
-              //       email: data.email,
-              //       password: data.password
-              //   });
-                
-              //   if (loginRes && !loginRes.ok) {
-              //       setSubmitError(loginRes.error || "")
-              //   }
-              //   else {
-              //       router.push("/")
-              //  }
-               }
-          } catch (error) {
-              if (error && error.response && error.response.data) {
-                  const errorMsg = error.response.data.error
-                  setSubmitError(errorMsg)
-              }
+            //   if (loginRes && !loginRes.ok) {
+            //       setSubmitError(loginRes.error || "")
+            //   }
+            //   else {
+            //       router.push("/")
+            //  }
           }
-
-          setLoading(false)
+        } catch (error) {
+          if (error && error.response && error.response.data) {
+            const errorMsg = error.response.data.error
+            setSubmitError(errorMsg)
+          }
+        }
+        setLoading(false)
       }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const handleInputChange = (event) => {
@@ -118,7 +107,8 @@ const Signup = () => {
   };
 
   const handleChange = (event) => {
-    setPosition(event.target.value)
+    setData((prev) => ({ ...prev, position: event.target.value }))
+    // setPosition(event.target.value)
   }
 
   return (
@@ -149,7 +139,7 @@ const Signup = () => {
                 placeholder="Enter text"
                 name="firstName"
                 value={data.firstName}
-                onChange={handleInputChange} 
+                onChange={handleInputChange}
                 required
                 error={getErrorMsg("firstName", validateData)}
               />
@@ -219,7 +209,7 @@ const Signup = () => {
                 SSN
               </label>
               <input
-                type="text"
+                type="number"
                 id="ssn"
                 className="custom-input"
                 name="ssn"
@@ -233,32 +223,31 @@ const Signup = () => {
               <label htmlFor="lincense" className="form-label">
                 Upload your driver lincense or state ID
               </label>
-              
-              <input type="file" id="file" className="custom-input" 
-              name="driverLicense"
-               value={data.driverLicense}
-               onChange={handleInputChange}
-               error={getErrorMsg("driverLicense", validateData)}
-               />
-             
+
+              <input type="file" id="file" className="custom-input"
+                name="driverLicense"
+                value={data.driverLicense}
+                onChange={handleInputChange}
+                error={getErrorMsg("driverLicense", validateData)}
+              />
+
             </div>
             <div className="form-group">
               <label htmlFor="position" className="form-label">
                 Position Available
-              
-              <p>
-                (if you cant find what you are looking for click on
-                &apos;other&apos;)
-              </p>
-             
-              <select name="position" id="position" value={position} onChange={handleChange}>
-                <option value="volvo">Customer service</option>
-                <option value="saab">Data Entry</option>
-                <option value="mercedes">Virtual Assistant</option>
-                <option value="audi">Sales Assistant</option>
-                <option value="audi">Virtual Book Keeper</option>
-                <option value="audi">Other</option>
-              </select>
+                <p>
+                  (if you cant find what you are looking for click on
+                  &apos;other&apos;)
+                </p>
+
+                <select name="position" id="position" value={data.position} onChange={handleChange}>
+                  <option value="volvo">Customer service</option>
+                  <option value="saab">Data Entry</option>
+                  <option value="mercedes">Virtual Assistant</option>
+                  <option value="audi">Sales Assistant</option>
+                  <option value="audi">Virtual Book Keeper</option>
+                  <option value="audi">Other</option>
+                </select>
               </label>
             </div>
             <button className="custom-button errorText" type="submit">SUBMIT</button>
