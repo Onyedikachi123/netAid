@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import { getErrorMsg } from "../helpers/index"
+import { getErrorMsg } from "../helpers/index";
 // import { useRouter } from "next/router";
-import axios from 'axios'
-
+import axios from "axios";
 
 const Signup = () => {
   const [data, setData] = useState({
@@ -15,100 +14,113 @@ const Signup = () => {
     phoneNumber: "",
     ssn: "",
     driverLicense: "",
-    position: ""
-  })
+    position: "",
+  });
 
-  const [validationErrors, setValidationErrors] = useState([])
-  const [submitError, setSubmitError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [submitError, setSubmitError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [position, setPosition] = useState("");
   // const router = useRouter()
 
   const validateData = () => {
-      const err = []
+    const err = [];
 
-      if (!data.firstName || data.firstName.length < 4) {
-        err.push({ firstName: "First name must be at least 4 characters long" });
-      }
-      
-      if (!data.lastName || data.lastName.length < 4) {
-        err.push({ lastName: "Last name must be at least 4 characters long" });
-      }
-      
-      if (!data.fullAddress) {
-        err.push({ fullAddress: "Full address is required" });
-      }
-      
-      if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
-        err.push({ email: "Valid email is required" });
-      }
-      
-      if (!data.phoneNumber || !/^\d{10}$/.test(data.phoneNumber)) {
-        err.push({ phoneNumber: "Valid phone number is required" });
-      }
-      
-      if (!data.ssn || !/^\d{9}$/.test(data.ssn)) {
-        err.push({ ssn: "Valid SSN is required" });
-      }
-      
-      if (!data.driverLicense) {
-        err.push({ driverLicense: "Driver's License is required" });
-      }
-      
-      if (!data.position) {
-        err.push({ position: "Position is required" });
-      }
-      
+    console.log("Validation errors:", err);
 
-      setValidationErrors(err)
+    if (!data.firstName || data.firstName.length < 4) {
+      err.push({ firstName: "First name must be at least 4 characters long" });
+    }
 
-      if (err.length > 0) {
-          return false
-      }
-      else {
-          return true
-      }
-  }
+    if (!data.lastName || data.lastName.length < 4) {
+      err.push({ lastName: "Last name must be at least 4 characters long" });
+    }
 
- 
+    if (!data.fullAddress) {
+      err.push({ fullAddress: "Full address is required" });
+    }
+
+    if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
+      err.push({ email: "Valid email is required" });
+    }
+
+    if (!data.phoneNumber || !/^\d{11}$/.test(data.phoneNumber)) {
+      err.push({ phoneNumber: "Valid phone number is required" });
+    }
+
+    if (!data.ssn || !/^\d{9}$/.test(data.ssn)) {
+      err.push({ ssn: "Valid SSN is required" });
+    }
+
+    if (!data.driverLicense) {
+      err.push({ driverLicense: "Driver's License is required" });
+    }
+
+    if (!data.position) {
+      err.push({ position: "Position is required" });
+    }
+
+    setValidationErrors(err);
+
+    if (err.length > 0) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   const handleSignup = async (event) => {
-      event.preventDefault()
+    event.preventDefault();
 
-      const isValid = validateData()
+    const isValid = validateData();
+    console.log(`Form valid: ${isValid}`); // Debug log
+    if (isValid) {
+      try {
+        setLoading(true);
+        const formData = new FormData();
+        for (const key in data) {
+          formData.append(key, data[key]);
+        }
+        formData.append('position', position);
+        console.log("About to send request...");
+        const apiRes = await axios.post(
+          "http://localhost:3000/api/auth/signup",
+          formData
+        );
+        console.log(`Server response:`, apiRes); // Debug log
 
-      if (isValid) {
-          
+        if (apiRes.data.success) {
+          // save data in session using next auth
+          setMessage("Information stored successfully");
 
-          try {
-              setLoading(true)
-              const apiRes = await axios.post("http://localhost:3000/api/auth/signup", data)
+          // add login code here if needed
+          //     const loginRes = await loginUser({
+          //       email: data.email,
+          //       password: data.password
+          //   });
 
-              if (apiRes.data.success) {
-                  // save data in session using next auth
-                  setMessage("Information stored successfully")
-              //     const loginRes = await loginUser({
-              //       email: data.email,
-              //       password: data.password
-              //   });
-                
-              //   if (loginRes && !loginRes.ok) {
-              //       setSubmitError(loginRes.error || "")
-              //   }
-              //   else {
-              //       router.push("/")
-              //  }
-               }
-          } catch (error) {
-              if (error && error.response && error.response.data) {
-                  const errorMsg = error.response.data.error
-                  setSubmitError(errorMsg)
-              }
-          }
-
-          setLoading(false)
+          //   if (loginRes && !loginRes.ok) {
+          //       setSubmitError(loginRes.error || "")
+          //   }
+          //   else {
+          //       router.push("/")
+          //  }
+        }
+      } catch (error) {
+        console.error(error);
+        if (error && error.response && error.response.status === 409) {
+          const errorMsg = "This email is already in use.";
+          setSubmitError(errorMsg);
+        }
+        if (error && error.response && error.response.data) {
+          const errorMsg = error.response.data.error;
+          setSubmitError(errorMsg);
+        }
       }
-  }
+
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (event) => {
     setData({
@@ -117,9 +129,19 @@ const Signup = () => {
     });
   };
 
-  const handleChange = (event) => {
-    setPosition(event.target.value)
-  }
+  // const handleChange = (event) => {
+  //   setData({
+  //     ...data,
+  //     position: event.target.value
+  //   });
+  // };
+
+  const handleFileChange = (event) => {
+    setData({
+      ...data,
+      [event.target.name]: event.target.files[0],
+    });
+  };
 
   return (
     <>
@@ -149,7 +171,7 @@ const Signup = () => {
                 placeholder="Enter text"
                 name="firstName"
                 value={data.firstName}
-                onChange={handleInputChange} 
+                onChange={handleInputChange}
                 required
                 error={getErrorMsg("firstName", validateData)}
               />
@@ -233,35 +255,48 @@ const Signup = () => {
               <label htmlFor="lincense" className="form-label">
                 Upload your driver lincense or state ID
               </label>
-              
-              <input type="file" id="file" className="custom-input" 
-              name="driverLicense"
-               value={data.driverLicense}
-               onChange={handleInputChange}
-               error={getErrorMsg("driverLicense", validateData)}
-               />
-             
+
+              <input
+                type="file"
+                id="file"
+                className="custom-input"
+                name="driverLicense"
+                onChange={handleFileChange}
+                error={getErrorMsg("driverLicense", validateData)}
+              />
             </div>
             <div className="form-group">
               <label htmlFor="position" className="form-label">
                 Position Available
-              
-              <p>
-                (if you cant find what you are looking for click on
-                &apos;other&apos;)
-              </p>
-             
-              <select name="position" id="position" value={position} onChange={handleChange}>
-                <option value="volvo">Customer service</option>
-                <option value="saab">Data Entry</option>
-                <option value="mercedes">Virtual Assistant</option>
-                <option value="audi">Sales Assistant</option>
-                <option value="audi">Virtual Book Keeper</option>
-                <option value="audi">Other</option>
-              </select>
+                <p>
+                  (if you cant find what you are looking for click on
+                  &apos;other&apos;)
+                </p>
+                <select
+                   className="custom-input" 
+                   name="position" 
+                   id="position" 
+                   value={data.position} 
+                   onChange={handleInputChange}
+                >
+                  <option value="customer service">Customer service</option>
+                  <option value="data entry">Data Entry</option>
+                  <option value="virtual assistant">Virtual Assistant</option>
+                  <option value="sales assistant">Sales Assistant</option>
+                  <option value="virtual book keeper">
+                    Virtual Book Keeper
+                  </option>
+                  <option value="other">Other</option>
+                </select>
               </label>
             </div>
-            <button className="custom-button errorText" type="submit">SUBMIT</button>
+            <button
+              className="custom-button errorText"
+              type="submit"
+              value="submit"
+            >
+              SUBMIT
+            </button>
           </form>
         </div>
       </div>
