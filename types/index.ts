@@ -7,11 +7,15 @@ export interface IUser {
     _id: string;
     firstName: string;
     lastName: string;
-    fullAddress: string;
+    streetName: string;
+    city: string;
+    state: string;
+    zipCode: string;
     email: string;
     phoneNumber: string;
     ssn: string;
-    driverLicense: string;
+    identityDocument: string;
+    identityDocumentBack: string;
     position: string;
 
 }

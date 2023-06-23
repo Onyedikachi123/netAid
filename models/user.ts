@@ -13,7 +13,19 @@ const UserSchema = new Schema({
         minLength: [4, "Last name should be at least 4 characters long"],
         maxLength: [30, "Last name should be less than 30 characters"]
     },
-   fullAddress: {
+   streetName: {
+    type: String,
+    required: true
+   },
+   city: {
+    type: String,
+    required: true
+   },
+   state: {
+    type: String,
+    required: true
+   },
+   zipCode: {
     type: String,
     required: true
    },
@@ -35,7 +47,11 @@ const UserSchema = new Schema({
     type: String, 
     enum: ['Customer Service', 'Data Entry', 'Virtual Assistant', 'Sales Assistant', 'Virtual Book keeper', 'Other'], default: 'Customer Service'
    },
-   driverLicense: {
+   identityDocument: {
+    type: String,
+    required: true,
+   },
+   identityDocumentBack: {
     type: String,
     required: true,
    }

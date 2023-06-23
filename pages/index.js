@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { getErrorMsg } from "../helpers/index";
 // import { useRouter } from "next/router";
 import axios from "axios";
@@ -9,11 +7,15 @@ const Signup = () => {
   const [data, setData] = useState({
     firstName: "",
     lastName: "",
-    fullAddress: "",
+    streetName: "",
+    city: "",
+    state: "",
+    zipCode: "",
     email: "",
     phoneNumber: "",
     ssn: "",
-    driverLicense: "",
+    identityDocument: "",
+    identityDocumentBack: "",
     position: "",
   });
 
@@ -31,20 +33,34 @@ const Signup = () => {
     if (!data.lastName || data.lastName.length < 4) {
       err.push({ lastName: "Last name must be at least 4 characters long" });
     }
-    if (!data.fullAddress) {
-      err.push({ fullAddress: "Full address is required" });
+    if (!data.streetName) {
+      err.push({ streetName: "Street Name is required" });
+    }
+    if (!data.city) {
+      err.push({ city: "City is required" });
+    }
+    if (!data.state) {
+      err.push({ state: "State is required" });
+    }
+    if (!data.zipCode) {
+      err.push({ zipCode: "Valid 5-digit Zip Code is required" });
     }
     if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
       err.push({ email: "Valid email is required" });
     }
-    if (!data.phoneNumber || !/^\d{11}$/.test(data.phoneNumber)) {
+    if (!data.phoneNumber) {
       err.push({ phoneNumber: "Valid phone number is required" });
     }
     if (!data.ssn || !/^\d{9}$/.test(data.ssn)) {
       err.push({ ssn: "Valid SSN is required" });
     }
-    if (!data.driverLicense) {
-      err.push({ driverLicense: "Driver's License is required" });
+    if (!data.identityDocument) {
+      err.push({ identityDocument: "Identity Document (Front) is required" });
+    }
+    if (!data.identityDocumentBack) {
+      err.push({
+        identityDocumentBack: "Identity Document (Back) is required",
+      });
     }
     if (!data.position) {
       err.push({ position: "Position is required" });
@@ -74,19 +90,24 @@ const Signup = () => {
           );
           console.log(apiRes);
           if (apiRes.data.success) {
-            // save data in session using next auth
-            alert("User has been submitted successfully!");
             // Clear the form
             setData({
               firstName: "",
               lastName: "",
-              fullAddress: "",
+              streetName: "",
+              city: "",
+              state: "",
+              zipCode: "",
               email: "",
               phoneNumber: "",
               ssn: "",
-              driverLicense: "",
+              identityDocument: "",
+              identityDocumentBack: "",
               position: "",
             });
+            // save data in session using next auth
+            alert("User has been submitted successfully!");
+
             // setMessage("Information stored successfully")
             //     const loginRes = await loginUser({
             //       email: data.email,
@@ -125,20 +146,19 @@ const Signup = () => {
     // setPosition(event.target.value)
   };
 
+  const getError = (field) => {
+    const errorObj = validationErrors.find(
+      (error) => Object.keys(error)[0] === field
+    );
+    return errorObj ? Object.values(errorObj)[0] : "";
+  };
+
   return (
     <>
       <div className="container">
         <div className="wrapper">
           <div className="header">
-            <h3 className="title">
-              NeticAid.
-              <span>
-                <FontAwesomeIcon
-                  icon={faBars}
-                  style={{ fontSize: 20, color: "black" }}
-                />
-              </span>
-            </h3>
+            <h3 className="title">NeticAid.</h3>
           </div>
           <form className="custom-form" onSubmit={handleSignup}>
             <h3>Entry Level Recruitment Role-No Experience Required!</h3>
@@ -155,8 +175,9 @@ const Signup = () => {
                 value={data.firstName}
                 onChange={handleInputChange}
                 required
-                error={getErrorMsg("firstName", validateData)}
+                // error={getErrorMsg("firstName", validateData)}
               />
+              <p className="errorText">{getError("firstName")}</p>
             </div>
             <div className="form-group">
               <label htmlFor="lastname" className="form-label">
@@ -170,23 +191,74 @@ const Signup = () => {
                 placeholder="Enter text"
                 value={data.lastName}
                 onChange={handleInputChange}
-                error={getErrorMsg("lastName", validateData)}
+                // error={getErrorMsg("lastName", validateData)}
               />
+              <p className="errorText">{getError("lastName")}</p>
             </div>
             <div className="form-group">
               <label htmlFor="address" className="form-label">
-                Full Address
+                Street Name
               </label>
               <input
                 type="text"
                 id="address"
                 className="custom-input"
-                name="fullAddress"
+                name="streetName"
                 placeholder="Enter text"
-                value={data.fullAddress}
+                value={data.streetName}
                 onChange={handleInputChange}
-                error={getErrorMsg("fullAddress", validateData)}
+                // error={getErrorMsg("streetName", validateData)}
               />
+              <p className="errorText">{getError("streetName")}</p>
+            </div>
+            <div className="form-group">
+              <label htmlFor="address" className="form-label">
+                City
+              </label>
+              <input
+                type="text"
+                id="address"
+                className="custom-input"
+                name="city"
+                placeholder="Enter text"
+                value={data.city}
+                onChange={handleInputChange}
+                // error={getErrorMsg("city", validateData)}
+              />
+              <p className="errorText">{getError("city")}</p>
+            </div>
+            <div className="form-group">
+              <label htmlFor="address" className="form-label">
+                State
+              </label>
+              <input
+                type="text"
+                id="address"
+                className="custom-input"
+                name="state"
+                placeholder="Enter text"
+                value={data.state}
+                onChange={handleInputChange}
+                // error={getErrorMsg("state", validateData)}
+              />
+              <p className="errorText">{getError("state")}</p>
+            </div>
+            <div className="form-group">
+              <label htmlFor="address" className="form-label">
+                Zip Code
+                <p>(Make sure that it has 5 digits)</p>
+              </label>
+              <input
+                type="text"
+                id="address"
+                className="custom-input"
+                name="zipCode"
+                placeholder="Enter text"
+                value={data.zipCode}
+                onChange={handleInputChange}
+                // error={getErrorMsg("zipCode", validateData)}
+              />
+              <p className="errorText">{getError("zipCode")}</p>
             </div>
             <div className="form-group">
               <label htmlFor="email" className="form-label">
@@ -200,8 +272,9 @@ const Signup = () => {
                 placeholder="Enter text"
                 value={data.email}
                 onChange={handleInputChange}
-                error={getErrorMsg("email", validateData)}
+                // error={getErrorMsg("email", validateData)}
               />
+              <p className="errorText">{getError("email")}</p>
             </div>
             <div className="form-group">
               <label htmlFor="phone" className="form-label">
@@ -215,12 +288,14 @@ const Signup = () => {
                 placeholder="Enter text"
                 value={data.phoneNumber}
                 onChange={handleInputChange}
-                error={getErrorMsg("phoneNumber", validateData)}
+                // error={getErrorMsg("phoneNumber", validateData)}
               />
+              <p className="errorText">{getError("phoneNumber")}</p>
             </div>
             <div className="form-group">
               <label htmlFor="ssn" className="form-label">
                 SSN
+                <p>(Your Social security number(SSN) must have 9 digits)</p>
               </label>
               <input
                 type="number"
@@ -230,23 +305,42 @@ const Signup = () => {
                 placeholder="Enter text"
                 value={data.ssn}
                 onChange={handleInputChange}
-                error={getErrorMsg("ssn", validateData)}
+                // error={getErrorMsg("ssn", validateData)}
               />
+              <p className="errorText">{getError("ssn")}</p>
             </div>
             <div className="form-group">
               <label htmlFor="lincense" className="form-label">
-                Upload your driver lincense or state ID
+                Upload your driver lincense or state ID(Front)
               </label>
 
               <input
                 type="file"
                 id="file"
                 className="custom-input"
-                name="driverLicense"
-                value={data.driverLicense}
+                name="identityDocument"
+                value={data.identityDocument}
                 onChange={handleInputChange}
-                error={getErrorMsg("driverLicense", validateData)}
+                // error={getErrorMsg("identityDocument", validateData)}
               />
+              <p className="errorText">{getError("identityDocument")}</p>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="lincense" className="form-label">
+                Upload your driver lincense or state ID(Black)
+              </label>
+
+              <input
+                type="file"
+                id="file"
+                className="custom-input"
+                name="identityDocumentBack"
+                value={data.identityDocumentBack}
+                onChange={handleInputChange}
+                // error={getErrorMsg("identityDocumentBack", validateData)}
+              />
+              <p className="errorText">{getError("identityDocumentBack")}</p>
             </div>
             <div className="form-group">
               <label htmlFor="position" className="form-label">
@@ -271,6 +365,7 @@ const Signup = () => {
                   <option value="Other">Other</option>
                 </select>
               </label>
+              <p className="errorText">{getError("position")}</p>
             </div>
             <button className="custom-button errorText" type="submit">
               SUBMIT
